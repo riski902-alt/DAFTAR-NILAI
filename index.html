@@ -11,6 +11,10 @@
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- Firebase SDK (Library untuk Cloud Database) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -272,7 +276,7 @@
                 </svg>
             </div>
             <h3 class="text-base font-bold text-slate-800">Nilai Berhasil Disimpan!</h3>
-            <p class="text-xs text-slate-500">Seluruh data nilai kelas telah tersimpan dengan aman.</p>
+            <p class="text-xs text-slate-500">Seluruh data nilai kelas telah tersimpan dengan aman ke Cloud Database.</p>
             <button onclick="closeModal('modal-success')" class="w-full py-2.5 text-xs font-bold text-white bg-denim hover:bg-blue-900 rounded-xl shadow-md transition-colors">
                 TUTUP
             </button>
@@ -280,6 +284,28 @@
     </div>
 
     <script>
+        // ==========================================
+        // KONFIGURASI FIREBASE CLOUD DATABASE
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCZyhDQUYNs3lKywZoA4yLbAJOtBmaL6bY",
+            authDomain: "nilai-informatika-5eb54.firebaseapp.com",
+            databaseURL: "https://nilai-informatika-5eb54-default-rtdb.firebaseio.com",
+            projectId: "nilai-informatika-5eb54",
+            storageBucket: "nilai-informatika-5eb54.firebasestorage.app",
+            messagingSenderId: "511520629986",
+            appId: "1:511520629986:web:c129898d25d87e8bd06abb",
+            measurementId: "G-LT30D707VR"
+        };
+        
+        // Inisialisasi Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+        // ==========================================
+
+
         // DAFTAR NAMA SISWA RESMI PER KELAS
         const classData = {
             "VII.1": [
@@ -337,8 +363,6 @@
 
         let currentClass = "VII.1";
         let currentGrades = {};
-        // Safe In-Memory Storage for Apps Script iframe sandbox compatibility
-        let inMemoryStorage = {};
 
         // INITALIZATION ON LOAD
         window.addEventListener('DOMContentLoaded', () => {
@@ -348,45 +372,36 @@
         function switchClass(className) {
             currentClass = className;
             document.getElementById('search-input').value = '';
+            
+            // Tampilkan pesan loading sementara mengambil data dari cloud
+            document.getElementById('table-head').innerHTML = '';
+            document.getElementById('table-body').innerHTML = `
+                <tr>
+                    <td colspan="100%" class="text-center py-12 text-slate-500 font-bold">
+                        Mengambil data dari Cloud Database... ⏳
+                    </td>
+                </tr>
+            `;
+            
             loadSavedGrades();
-            renderTable();
         }
 
-        // SAFE LOCAL STORAGE WITH IN-MEMORY FALLBACK
-        function safeGetStorage(key) {
-            try {
-                if (typeof window !== 'undefined' && window.localStorage) {
-                    return window.localStorage.getItem(key);
-                }
-            } catch (e) {
-                console.warn("LocalStorage unavailable, using memory store:", e);
-            }
-            return inMemoryStorage[key] || null;
-        }
-
-        function safeSetStorage(key, value) {
-            try {
-                if (typeof window !== 'undefined' && window.localStorage) {
-                    window.localStorage.setItem(key, value);
-                }
-            } catch (e) {
-                console.warn("LocalStorage write failed, using memory store:", e);
-            }
-            inMemoryStorage[key] = value;
-        }
-
+        // MEMUAT DARI FIREBASE (CLOUD)
         function loadSavedGrades() {
             const key = `INFORMATIKA_FUN_NILAI_${currentClass}`;
-            const stored = safeGetStorage(key);
-            if (stored) {
-                try {
-                    currentGrades = JSON.parse(stored);
-                } catch(e) {
+            
+            database.ref('grades/' + key).once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    currentGrades = snapshot.val();
+                } else {
                     currentGrades = {};
                 }
-            } else {
+                renderTable(); // Gambar tabel setelah data selesai dimuat
+            }).catch((error) => {
+                console.error("Gagal memuat dari Cloud:", error);
                 currentGrades = {};
-            }
+                renderTable();
+            });
         }
 
         function renderTable() {
@@ -601,7 +616,6 @@
             }
         }
 
-        // FORMULA: ((2 * Average_Formatif + Average_Sumatif) / 3)
         function updateStudentAverage(studentIdx) {
             const isGrade7or9 = currentClass.startsWith('VII') || currentClass.startsWith('IX');
             const sGrades = currentGrades[studentIdx] || {};
@@ -637,7 +651,7 @@
                 finalAvg = ((2 * avgFormatif) + avgSumatif) / 3;
             }
 
-            const avgCell = document.getElementById(`avg-${studentIdx}`);
+            const avgCell = document.getElementById(`avg-${idx}`);
             if (avgCell) {
                 avgCell.innerText = finalAvg > 0 ? finalAvg.toFixed(1) : '0.0';
             }
@@ -669,7 +683,6 @@
             document.getElementById('stat-class-avg').innerText = classAvg;
         }
 
-        // REALTIME SEARCH FILTER
         function filterStudents(query) {
             const q = query.toLowerCase().trim();
             const rows = document.querySelectorAll('.student-row');
@@ -702,11 +715,19 @@
             }
         }
 
+        // MENYIMPAN KE FIREBASE (CLOUD)
         function executeSave() {
             closeModal('modal-confirm');
             const key = `INFORMATIKA_FUN_NILAI_${currentClass}`;
-            safeSetStorage(key, JSON.stringify(currentGrades));
-            document.getElementById('modal-success').classList.remove('hidden');
+            
+            database.ref('grades/' + key).set(currentGrades)
+                .then(() => {
+                    document.getElementById('modal-success').classList.remove('hidden');
+                })
+                .catch((error) => {
+                    showToast("Gagal menyimpan ke server, periksa koneksi internet.");
+                    console.error("Gagal simpan:", error);
+                });
         }
 
         function closeModal(id) {
