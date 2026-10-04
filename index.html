@@ -1,467 +1,820 @@
-<!-- ==========================================
-     FILE: Index.html
-     FRONTEND UI & LOGIC (HTML + CSS + JS)
-     ========================================== -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Daftar Hadir - Informatika Fun</title>
-  
-  <!-- Tailwind CSS untuk styling yang cepat dan modern -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- SweetAlert2 untuk notifikasi alert yang keren -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- FontAwesome untuk Icon -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Konfigurasi Tema Warna (Sesuai Konsep Desain) -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'soft-denim': '#60A5FA',
-            'medium-denim': '#3B82F6',
-            'dusty-blue': '#64748B',
-            'light-sky': '#E0F2FE',
-            'very-soft-blue': '#F0F9FF',
-            'cyan-accent': '#06B6D4'
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAFTAR NILAI - INFORMATIKA FUN</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS CDN for Real Excel (.xlsx) Export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 40%, #f3e8ff 100%);
+            min-height: 100vh;
+            color: #1e293b;
         }
-      }
-    }
-  </script>
 
-  <style>
-    /* Styling Custom untuk efek Glassmorphism */
-    body {
-      background-color: #F0F9FF; /* very-soft-blue */
-      background-image: radial-gradient(circle at top right, #E0F2FE 0%, transparent 40%),
-                        radial-gradient(circle at bottom left, #E0F2FE 0%, transparent 40%);
-      background-attachment: fixed;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    .glass-card {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
-      border-radius: 1rem;
-    }
+        /* Glassmorphism Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 10px 30px -10px rgba(30, 58, 138, 0.08);
+        }
 
-    /* Custom Radio Buttons untuk Status Kehadiran (Segmented Control style) */
-    .status-radio input[type="radio"] {
-      display: none;
-    }
-    .status-radio label {
-      display: inline-block;
-      padding: 6px 12px;
-      margin: 2px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease-in-out;
-      background-color: #F1F5F9;
-      color: #64748B;
-      border: 1px solid transparent;
-    }
-    
-    /* Warna aktif ketika dipilih */
-    .status-radio input[value="Hadir"]:checked + label { background-color: #10B981; color: white; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3); }
-    .status-radio input[value="Sakit"]:checked + label { background-color: #3B82F6; color: white; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3); }
-    .status-radio input[value="Izin"]:checked + label { background-color: #F59E0B; color: white; box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.3); }
-    .status-radio input[value="Alpa"]:checked + label { background-color: #EF4444; color: white; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3); }
-  </style>
+        /* Color Scheme Variables */
+        .bg-denim { background-color: #1e3a8a; }
+        .text-denim { color: #1e3a8a; }
+        .border-denim { border-color: #1e3a8a; }
+        .bg-soft-blue { background-color: #3b82f6; }
+        .bg-light-blue { background-color: #dbeafe; }
+        .bg-baby-blue { background-color: #e0f2fe; }
+        .bg-powder-blue { background-color: #bae6fd; }
+        .bg-soft-cyan { background-color: #cff4fc; }
+        .bg-warm-cream { background-color: #fef3c7; }
+        .bg-dusty-lavender { background-color: #f3e8ff; }
+
+        /* Custom Modern Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #93c5fd;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b82f6;
+        }
+
+        /* Sticky Columns */
+        .sticky-col-1 {
+            position: sticky;
+            left: 0;
+            z-index: 20;
+            background-color: #ffffff;
+        }
+        .sticky-col-2 {
+            position: sticky;
+            left: 48px;
+            z-index: 20;
+            background-color: #ffffff;
+            border-right: 2px solid #cbd5e1;
+        }
+
+        /* Sticky Headers */
+        .sticky-header-1 { position: sticky; top: 0; z-index: 30; }
+        .sticky-header-2 { position: sticky; top: 36px; z-index: 30; }
+        .sticky-header-3 { position: sticky; top: 72px; z-index: 30; }
+
+        /* Sticky Overlaps (Top-Left Corner Cells) */
+        th.sticky-col-1, th.sticky-col-2 {
+            z-index: 40 !important;
+        }
+
+        /* Grade Input Styling */
+        .grade-input {
+            width: 52px;
+            text-align: center;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 4px 2px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.15s ease-in-out;
+            background-color: #ffffff;
+        }
+        .grade-input:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+            background-color: #eff6ff;
+        }
+        .input-error {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+            color: #dc2626 !important;
+        }
+
+        /* Success Checkmark Modal Animation */
+        .checkmark-svg {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 3;
+            stroke: #16a34a;
+            stroke-miterlimit: 10;
+            box-shadow: inset 0px 0px 0px #16a34a;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+        .checkmark-circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 3;
+            stroke-miterlimit: 10;
+            stroke: #16a34a;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        .checkmark-check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+    </style>
 </head>
-<body class="min-h-screen p-4 md:p-8 text-slate-800">
+<body class="p-3 sm:p-6 md:p-8">
 
-  <!-- ================= HEADER ================= -->
-  <header class="text-center mb-8">
-    <div class="inline-flex items-center justify-center space-x-3 mb-2 text-medium-denim">
-      <i class="fas fa-clipboard-check text-2xl"></i>
-      <i class="fas fa-microchip text-xl text-cyan-accent opacity-50"></i>
-      <i class="far fa-calendar-alt text-2xl"></i>
-    </div>
-    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-medium-denim">DAFTAR HADIR</h1>
-    <p class="text-dusty-blue font-medium mt-1">Absensi Pembelajaran Informatika • <span class="text-cyan-accent">INFORMATIKA FUN</span></p>
-  </header>
-
-  <!-- ================= PANEL KONTROL (FILTER) ================= -->
-  <div class="glass-card p-6 mb-6">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      
-      <!-- Pilih Kelas -->
-      <div>
-        <label class="block text-sm font-bold text-dusty-blue mb-2"><i class="fas fa-users mr-2"></i>PILIH KELAS</label>
-        <select id="selectKelas" onchange="gantiKelas()" class="w-full p-3 rounded-xl border border-blue-100 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-soft-denim transition">
-          <option value="">-- Pilih Kelas --</option>
-          <option value="VII.1">VII.1</option>
-          <option value="VII.2">VII.2</option>
-          <option value="VIII.1">VIII.1</option>
-          <option value="VIII.2">VIII.2</option>
-          <option value="VIII.3">VIII.3</option>
-          <option value="IX.1">IX.1</option>
-          <option value="IX.2">IX.2</option>
-        </select>
-      </div>
-
-      <!-- Pilih Tanggal -->
-      <div>
-        <label class="block text-sm font-bold text-dusty-blue mb-2"><i class="far fa-calendar mr-2"></i>TANGGAL PEMBELAJARAN</label>
-        <input type="date" id="inputTanggal" class="w-full p-3 rounded-xl border border-blue-100 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-soft-denim transition">
-      </div>
-
-      <!-- Pilih Pertemuan -->
-      <div>
-        <label class="block text-sm font-bold text-dusty-blue mb-2"><i class="fas fa-book-open mr-2"></i>PILIH PERTEMUAN</label>
-        <select id="selectPertemuan" class="w-full p-3 rounded-xl border border-blue-100 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-soft-denim transition">
-          <option value="">-- Pilih Pertemuan --</option>
-          <!-- Digenerate oleh JS -->
-        </select>
-      </div>
-
+    <!-- Toast Warning Alert -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-full transition-transform duration-300 ease-out flex items-center bg-red-600 text-white px-5 py-3 rounded-xl shadow-xl font-medium text-xs sm:text-sm">
+        <span class="mr-2 text-lg">⚠️</span>
+        <span id="toast-message">Notifikasi</span>
     </div>
 
-    <!-- Tombol Aksi -->
-    <div class="mt-6 flex flex-wrap gap-3 justify-center md:justify-start">
-      <button onclick="hadirSemua()" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition flex items-center">
-        <i class="fas fa-check-double mr-2"></i> HADIR SEMUA
-      </button>
-      <button onclick="simpanAbsensi()" id="btnSimpan" class="px-6 py-3 bg-medium-denim hover:bg-blue-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition flex items-center">
-        <i class="fas fa-save mr-2"></i> SIMPAN ABSENSI
-      </button>
-      <button onclick="bukaRekap()" class="px-6 py-3 bg-dusty-blue hover:bg-slate-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition flex items-center">
-        <i class="fas fa-chart-bar mr-2"></i> REKAP HADIR
-      </button>
-      <button onclick="downloadExcel()" class="px-6 py-3 bg-cyan-accent hover:bg-cyan-600 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition flex items-center ml-auto">
-        <i class="fas fa-file-excel mr-2"></i> EXCEL
-      </button>
-    </div>
-  </div>
+    <div class="max-w-7xl mx-auto space-y-6">
 
-  <!-- ================= KARTU STATISTIK ================= -->
-  <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6" id="panelStatistik" style="display: none;">
-    <div class="glass-card p-4 text-center border-l-4 border-dusty-blue">
-      <i class="fas fa-users text-dusty-blue text-2xl mb-1"></i>
-      <div class="text-xs font-bold text-slate-500">TOTAL SISWA</div>
-      <div class="text-2xl font-black text-slate-700" id="statTotal">0</div>
-    </div>
-    <div class="glass-card p-4 text-center border-l-4 border-emerald-500">
-      <i class="fas fa-smile text-emerald-500 text-2xl mb-1"></i>
-      <div class="text-xs font-bold text-slate-500">HADIR</div>
-      <div class="text-2xl font-black text-emerald-600" id="statHadir">0</div>
-    </div>
-    <div class="glass-card p-4 text-center border-l-4 border-blue-500">
-      <i class="fas fa-thermometer-half text-blue-500 text-2xl mb-1"></i>
-      <div class="text-xs font-bold text-slate-500">SAKIT</div>
-      <div class="text-2xl font-black text-blue-600" id="statSakit">0</div>
-    </div>
-    <div class="glass-card p-4 text-center border-l-4 border-amber-500">
-      <i class="fas fa-envelope-open-text text-amber-500 text-2xl mb-1"></i>
-      <div class="text-xs font-bold text-slate-500">IZIN</div>
-      <div class="text-2xl font-black text-amber-600" id="statIzin">0</div>
-    </div>
-    <div class="glass-card p-4 text-center border-l-4 border-red-500">
-      <i class="fas fa-user-times text-red-500 text-2xl mb-1"></i>
-      <div class="text-xs font-bold text-slate-500">ALPA</div>
-      <div class="text-2xl font-black text-red-600" id="statAlpa">0</div>
-    </div>
-  </div>
+        <!-- PAGE TITLE HEADER -->
+        <header class="text-center space-y-2 py-2">
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-denim text-white tracking-widest uppercase shadow-sm">
+                INFORMATIKA FUN
+            </span>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-denim tracking-tight">
+                DAFTAR NILAI
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-600 font-medium">
+                Pengolahan Nilai Pembelajaran Informatika
+            </p>
+        </header>
 
-  <!-- ================= TABEL ABSENSI ================= -->
-  <div class="glass-card overflow-hidden" id="panelTabel" style="display: none;">
-    
-    <!-- Pencarian Siswa -->
-    <div class="p-4 border-b border-white/50 bg-white/30">
-      <div class="relative">
-        <i class="fas fa-search absolute left-4 top-3.5 text-slate-400"></i>
-        <input type="text" id="inputCari" onkeyup="cariSiswa()" placeholder="Cari nama siswa..." class="w-full pl-11 p-3 rounded-xl border border-blue-100 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-soft-denim">
-      </div>
-    </div>
-
-    <!-- Container Tabel -->
-    <div class="overflow-x-auto p-4">
-      <table class="w-full text-left border-collapse" id="tabelSiswa">
-        <thead>
-          <tr class="bg-light-sky text-medium-denim">
-            <th class="p-4 rounded-tl-xl font-bold w-16 text-center">NO</th>
-            <th class="p-4 font-bold">NAMA SISWA</th>
-            <th class="p-4 rounded-tr-xl font-bold text-center w-80">STATUS KEHADIRAN</th>
-          </tr>
-        </thead>
-        <tbody id="bodyTabelSiswa">
-          <!-- Data siswa dimasukkan via JS -->
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Pesan belum pilih kelas -->
-  <div id="pesanAwal" class="text-center p-12 text-dusty-blue glass-card">
-    <i class="fas fa-clipboard-list text-6xl mb-4 opacity-50"></i>
-    <h3 class="text-xl font-bold">Silakan pilih kelas terlebih dahulu.</h3>
-    <p class="text-sm mt-2">Daftar siswa akan otomatis muncul di sini.</p>
-  </div>
-
-
-  <!-- ================= JAVASCRIPT ================= -->
-  <script>
-    // 1. DATABASE SISWA UTAMA (Sesuai instruksi)
-    const databaseSiswa = {
-      "VII.1": [
-        "FARIS NAUVAL", "ABDILLAH KHUSAIRY", "AQIFAH NUR AIN", "ARMAN ARDI", "FAIS MUBARAT", 
-        "IMAM AL GHAZALI", "KHAERUNNISA", "MUH. FADLI", "MUH. FAIZ ADZANI", "MUH. FAQIH ISKANDAR", 
-        "MUH. RAFA DZAKWANSYAM", "MUHAMMAD ALIF AKBAR", "MUHAMMAD ASKAR", "MUHAMMAD AZHAR", 
-        "NUR ALISAH PUTRI", "NUR ANNISA", "NURFADILA ZAHRA", "NURLIYANA RAMADANI", "RAHMAT HIDAYAT", 
-        "REZKI AULIA", "RISKA AULIA SAPUTRI"
-      ],
-      "VII.2": [
-        "AISHA FARHANA", "AKBAR", "ARIL SAPUTRA", "ASHIRATUL SYAHRA", "AURA KASIH", "ERWING", 
-        "IZZATUL MUNAWIR", "MUH. ASFAR", "MUH. ASHRAF", "MUH. FAISAL", "MUH. SYAWAL", 
-        "MUHAMMAD ALQAF AL BUQHARI", "MUNAWWARA", "MUTFIKA WANA", "NAUFAL AFKRA ZAINAL", 
-        "NUR RAYATUL YUSDA", "NURFADLA", "RAMADAN", "RIFKY IBNU HARSAD", "WAHYU ASHARI", "ZELDA SAVITRI ANWAR"
-      ],
-      "VIII.1": [
-        "ALIYA RATU SALSABILA", "ANDIKA", "ANITA MAWAR", "AZWAN FAIZ", "DIVAL ALFIANDRA", 
-        "ISRA FIRAHMAT", "ISTIQOMAH", "M.RISKI ADITYA", "MUAKIFATUN NAILAH USMAN", "MUH. UZNUL KHUDUD", 
-        "MUH. YAZID ALGHYFARI", "MUH.ALVIANSYAH", "MUHAMMAD ALIF", "MUHAMMAD ANAMTA MUCTIALI", "MUTMAINNA", 
-        "NUR WAHYUNI", "NURUL APRILIA", "NUZULIA RAHMA", "REZKY AMELIA", "RIVAL MUHAJIRIN", 
-        "SALSABILA AZ-ZAHRA", "ULFATUN NISA", "ZHUFAHIRA ADZHA PUTRI"
-      ],
-      "VIII.2": [
-        "AFIF AL GIFARI", "ALIF AKRAM", "AYIRA", "DIRHAN FAIS", "FIRKAN PUTRA", "FIRMANSYAH", 
-        "FITRI AGUSTINA", "HASRUL", "KHAERUL AZZAM", "MAJSYANDHA", "MUH. RIFALDI", "MUHAMMAD ARIL", 
-        "MUHAMMAD MANSUR", "NAILA", "NAZILAH AZAHRA", "NUR AIVAH", "NUR FAUZIA ANNISA", "NUR FAZIRA", 
-        "NUR WAFIQAH", "NURLINDA", "RIFYAH AMALIAH HAM", "ZAINAB ASVIA"
-      ],
-      "VIII.3": [
-        "MARSYAH KOYRALA", "AFGIAN TRI WIJAYA", "AFIFAH UFAIRAH", "ARFI AZAN", "DANDI", 
-        "FAUZIL RAHMAT", "HILDA NURSIDQIAZIZAH", "ISMAIL", "KARIIMAH SHOBRYYAH", "KHAIRUL FAJAR", 
-        "KIRANA SYAM", "MUH. AGIH", "MUH. RENALDI", "MUSTAFAINAL YAHYA", "NINDYA GURATTU AENI", 
-        "NURAENI", "NURUL BIDASARI AULIYA", "SALMIA", "SUFRIADY", "TIARA RAMADHANI"
-      ],
-      "IX.1": [
-        "ARIL ARDIANSYAH", "ASHAR ASDAR", "A.RISMA ASTARI", "AHSANUL QASAS", "AMELIA PUTRI", 
-        "ANDI NURAFIFA R.BASO", "ARIF RAHMAN", "ASMIRANDA", "ATIKAH FAJARWATY", "CHELSEA AMINITY PUTRI", 
-        "HAIKAL", "IIN INAYAH PUTRI", "JAYA SAPUTRA", "KASMIA DAHNIA", "KHAERUL AZZAM", "MARSIJI", 
-        "MOHAMMAD WAHYU", "MUH.ILLIAS", "MUHAMMAD ZIDAN ARKANA", "NURAENI", "NURLAILY", "NURSAHDA", 
-        "NURSYAKILA", "SUCI RAMADHANI", "SUL JALALIN WALIQRAM", "SYAMSURYADI", "SYARLINI"
-      ],
-      "IX.2": [
-        "A. KHALIFATUL ADAWIYA", "AGHYVANNO ALIFQA AZZAM", "ANDI AMSYA", "ARIANTI", "ASKIA NUR FADILLAH", 
-        "FEBRIANI MAULIDYA", "IKBAL RADIMAN", "IRWANSYAH", "ISFA SALSABILA", "MIKA NUR AKBAR", 
-        "MUH ASRAM DANI", "MUH JAELANI", "MUH.RIJALUL HAQ", "MUHAMMAD AHAR ADHYRA", "MUHAMMAD FAHRI", 
-        "MUHAMMAD FAWWAZ", "MUHDIYATUL ADZQIYAH", "NENSI", "NURFATIMA", "NURUL AINI", "PUTRI DIANA", 
-        "RIFKATUL JANNA", "SAPUTRA EFENDI", "SELVY SAID", "SITI AQILA ANNISA", "SULFAIDAH"
-      ]
-    };
-
-    // State Aplikasi (untuk menyimpan memori sementara)
-    let currentStudents = [];
-    let absensiState = {}; // Format: {"Nama": "Hadir", ...}
-
-    // 2. Inisialisasi Halaman (Generate 19 Pertemuan)
-    document.addEventListener("DOMContentLoaded", function() {
-      const selectPertemuan = document.getElementById("selectPertemuan");
-      for (let i = 1; i <= 19; i++) {
-        let option = document.createElement("option");
-        option.value = "Pertemuan " + i;
-        option.text = "Pertemuan " + i;
-        selectPertemuan.appendChild(option);
-      }
-    });
-
-    // 3. Menangani Perubahan Kelas
-    function gantiKelas() {
-      const kelas = document.getElementById("selectKelas").value;
-      if (!kelas) {
-        document.getElementById("panelTabel").style.display = "none";
-        document.getElementById("panelStatistik").style.display = "none";
-        document.getElementById("pesanAwal").style.display = "block";
-        return;
-      }
-
-      currentStudents = databaseSiswa[kelas] || [];
-      absensiState = {}; // Reset state absensi
-      
-      document.getElementById("inputCari").value = "";
-      document.getElementById("pesanAwal").style.display = "none";
-      document.getElementById("panelTabel").style.display = "block";
-      document.getElementById("panelStatistik").style.display = "grid";
-      
-      renderTabel(currentStudents);
-      updateStatistik();
-    }
-
-    // 4. Render Tabel Berdasarkan Data Siswa
-    function renderTabel(dataSiswa) {
-      const tbody = document.getElementById("bodyTabelSiswa");
-      tbody.innerHTML = "";
-
-      dataSiswa.forEach((nama, index) => {
-        // Ambil status yang sudah dipilih (jika ada)
-        const statusH = absensiState[nama] === "Hadir" ? "checked" : "";
-        const statusS = absensiState[nama] === "Sakit" ? "checked" : "";
-        const statusI = absensiState[nama] === "Izin" ? "checked" : "";
-        const statusA = absensiState[nama] === "Alpa" ? "checked" : "";
-
-        const tr = document.createElement("tr");
-        tr.className = "border-b border-slate-200 hover:bg-slate-50 transition";
-        tr.innerHTML = `
-          <td class="p-4 text-center font-medium text-slate-500">${index + 1}</td>
-          <td class="p-4 font-bold text-slate-700">${nama}</td>
-          <td class="p-4 text-center">
-            <div class="status-radio flex justify-center space-x-1">
-              <input type="radio" id="H_${index}" name="status_${index}" value="Hadir" onchange="catatStatus('${nama}', 'Hadir')" ${statusH}>
-              <label for="H_${index}">HADIR</label>
-              
-              <input type="radio" id="S_${index}" name="status_${index}" value="Sakit" onchange="catatStatus('${nama}', 'Sakit')" ${statusS}>
-              <label for="S_${index}">SAKIT</label>
-              
-              <input type="radio" id="I_${index}" name="status_${index}" value="Izin" onchange="catatStatus('${nama}', 'Izin')" ${statusI}>
-              <label for="I_${index}">IZIN</label>
-              
-              <input type="radio" id="A_${index}" name="status_${index}" value="Alpa" onchange="catatStatus('${nama}', 'Alpa')" ${statusA}>
-              <label for="A_${index}">ALPA</label>
+        <!-- KONTROL & DASHBOARD RINGKASAN -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- CARD PILIH KELAS -->
+            <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+                <div>
+                    <label for="class-select" class="block text-xs font-extrabold text-denim uppercase tracking-wider mb-2">
+                        📍 PILIH KELAS
+                    </label>
+                    <div class="relative">
+                        <select id="class-select" onchange="switchClass(this.value)" class="w-full bg-white border border-slate-300 text-slate-800 font-bold text-sm sm:text-base rounded-xl px-4 py-3 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-600 shadow-sm cursor-pointer">
+                            <option value="VII.1">Kelas VII.1</option>
+                            <option value="VII.2">Kelas VII.2</option>
+                            <option value="VIII.1">Kelas VIII.1</option>
+                            <option value="VIII.2">Kelas VIII.2</option>
+                            <option value="VIII.3">Kelas VIII.3</option>
+                            <option value="IX.1">Kelas IX.1</option>
+                            <option value="IX.2">Kelas IX.2</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                            ▼
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 text-[11px] text-slate-500 flex items-center gap-1.5">
+                    <span>💡</span> Struktur BAB & daftar siswa dimuat otomatis.
+                </div>
             </div>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
 
-    // 5. Menyimpan status sementara di memori JS & update card stat
-    function catatStatus(nama, status) {
-      absensiState[nama] = status;
-      updateStatistik();
-    }
+            <!-- CARD PENCARIAN, TOMBOL ACTION, & RINGKASAN -->
+            <div class="glass-card rounded-2xl p-5 lg:col-span-2 flex flex-col justify-between gap-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <!-- Realtime Search Input -->
+                    <div class="relative flex-1">
+                        <input type="text" id="search-input" oninput="filterStudents(this.value)" placeholder="🔎 Cari nama siswa..." class="w-full bg-white border border-slate-300 text-slate-800 text-xs sm:text-sm rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                    </div>
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="confirmSave()" class="flex-1 sm:flex-none bg-denim hover:bg-blue-900 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1.5">
+                            <span>💾</span> SIMPAN NILAI
+                        </button>
+                        <button onclick="exportToExcel()" class="flex-1 sm:flex-none bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1.5">
+                            <span>📊</span> UNDUH EXCEL
+                        </button>
+                    </div>
+                </div>
 
-    // 6. Tombol "HADIR SEMUA"
-    function hadirSemua() {
-      if (currentStudents.length === 0) {
-        Swal.fire({ icon: 'warning', title: 'Oops...', text: '⚠ Silakan pilih kelas terlebih dahulu.' });
-        return;
-      }
-      
-      currentStudents.forEach(nama => {
-        absensiState[nama] = "Hadir";
-      });
-      
-      // Render ulang tabel supaya radio button terupdate secara visual
-      // Gunakan nilai search jika sedang mencari
-      cariSiswa(); 
-      updateStatistik();
-    }
+                <!-- Summary Indicators -->
+                <div class="grid grid-cols-2 gap-3 pt-1">
+                    <div class="bg-baby-blue/80 border border-blue-200 rounded-xl p-3 flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">JUMLAH SISWA</p>
+                            <p id="stat-student-count" class="text-lg sm:text-xl font-bold text-denim">0</p>
+                        </div>
+                        <div class="text-2xl">👥</div>
+                    </div>
+                    <div class="bg-warm-cream/90 border border-amber-200 rounded-xl p-3 flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">RATA-RATA KELAS</p>
+                            <p id="stat-class-avg" class="text-lg sm:text-xl font-bold text-amber-800">0.0</p>
+                        </div>
+                        <div class="text-2xl">📈</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    // 7. Update Angka Statistik Real-time
-    function updateStatistik() {
-      let h = 0, s = 0, i = 0, a = 0;
-      currentStudents.forEach(nama => {
-        let st = absensiState[nama];
-        if(st === "Hadir") h++;
-        if(st === "Sakit") s++;
-        if(st === "Izin") i++;
-        if(st === "Alpa") a++;
-      });
+        <!-- TABEL KELOLA NILAI -->
+        <div class="glass-card rounded-2xl p-3 sm:p-4 border border-white/60">
+            <div class="overflow-x-auto overflow-y-auto max-h-[560px] rounded-xl relative border border-slate-200 bg-white shadow-inner">
+                <table id="grades-table" class="w-full text-xs text-left border-collapse">
+                    <thead id="table-head"></thead>
+                    <tbody id="table-body" class="divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
 
-      document.getElementById("statTotal").innerText = currentStudents.length;
-      document.getElementById("statHadir").innerText = h;
-      document.getElementById("statSakit").innerText = s;
-      document.getElementById("statIzin").innerText = i;
-      document.getElementById("statAlpa").innerText = a;
-    }
+        <footer class="text-center text-xs text-slate-500 py-2">
+            INFORMATIKA FUN &copy; 2026 - Aplikasi Pengolahan Nilai Pembelajaran Informatika
+        </footer>
+    </div>
 
-    // 8. Fungsi Pencarian Siswa (Real-time Filter)
-    function cariSiswa() {
-      const keyword = document.getElementById("inputCari").value.toUpperCase();
-      const filtered = currentStudents.filter(nama => nama.includes(keyword));
-      renderTabel(filtered); // Render ulang tabel hanya dengan data yang difilter
-    }
+    <!-- MODAL PERINGATAN NILAI BELUM LENGKAP -->
+    <div id="modal-confirm" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-card bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200">
+            <div class="flex items-center gap-3 text-amber-600">
+                <div class="text-3xl">⚠️</div>
+                <h3 class="text-base font-bold text-slate-800">Nilai Belum Lengkap</h3>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Masih terdapat nilai yang belum diisi. Apakah Anda tetap ingin menyimpan?
+            </p>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button onclick="closeModal('modal-confirm')" class="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+                    PERIKSA KEMBALI
+                </button>
+                <button onclick="executeSave()" class="px-4 py-2 text-xs font-bold text-white bg-denim hover:bg-blue-900 rounded-xl transition-colors shadow-md">
+                    SIMPAN
+                </button>
+            </div>
+        </div>
+    </div>
 
-    // 9. Simpan Ke Database (Google Sheets) via Apps Script backend
-    function simpanAbsensi() {
-      const kelas = document.getElementById("selectKelas").value;
-      const tanggal = document.getElementById("inputTanggal").value;
-      const pertemuan = document.getElementById("selectPertemuan").value;
+    <!-- MODAL SUKSES SIMPAN -->
+    <div id="modal-success" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-card bg-white rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-slate-200">
+            <div class="flex justify-center my-1">
+                <svg class="checkmark-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                    <circle class="checkmark-circle" cx="26" cy="26" r="23" fill="none"/>
+                    <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+            </div>
+            <h3 class="text-base font-bold text-slate-800">Nilai Berhasil Disimpan!</h3>
+            <p class="text-xs text-slate-500">Seluruh data nilai kelas telah tersimpan dengan aman.</p>
+            <button onclick="closeModal('modal-success')" class="w-full py-2.5 text-xs font-bold text-white bg-denim hover:bg-blue-900 rounded-xl shadow-md transition-colors">
+                TUTUP
+            </button>
+        </div>
+    </div>
 
-      // Validasi Input
-      if (!kelas) return Swal.fire({ icon: 'warning', text: '⚠ Silakan pilih kelas terlebih dahulu.' });
-      if (!tanggal) return Swal.fire({ icon: 'warning', text: '⚠ Silakan pilih tanggal pembelajaran.' });
-      if (!pertemuan) return Swal.fire({ icon: 'warning', text: '⚠ Silakan pilih pertemuan.' });
+    <script>
+        // DAFTAR NAMA SISWA RESMI PER KELAS
+        const classData = {
+            "VII.1": [
+                "FARIS NAUVAL", "ABDILLAH KHUSAIRY", "AQIFAH NUR AIN", "ARMAN ARDI", "FAIS MUBARAT",
+                "IMAM AL GHAZALI", "KHAERUNNISA", "MUH. FADLI", "MUH. FAIZ ADZANI", "MUH. FAQIH ISKANDAR",
+                "MUH. RAFA DZAKWANSYAM", "MUHAMMAD ALIF AKBAR", "MUHAMMAD ASKAR", "MUHAMMAD AZHAR",
+                "NUR ALISAH PUTRI", "NUR ANNISA", "NURFADILA ZAHRA", "NURLIYANA RAMADANI",
+                "RAHMAT HIDAYAT", "REZKI AULIA", "RISKA AULIA SAPUTRI"
+            ],
+            "VII.2": [
+                "AISHA FARHANA", "AKBAR", "ARIL SAPUTRA", "ASHIRATUL SYAHRA", "AURA KASIH",
+                "ERWING", "IZZATUL MUNAWIR", "MUH. ASFAR", "MUH. ASHRAF", "MUH. FAISAL",
+                "MUH. SYAWAL", "MUHAMMAD ALQAF AL BUQHARI", "MUNAWWARA", "MUTFIKA WANA",
+                "NAUFAL AFKRA ZAINAL", "NUR RAYATUL YUSDA", "NURFADLA", "RAMADAN",
+                "RIFKY IBNU HARSAD", "WAHYU ASHARI", "ZELDA SAVITRI ANWAR"
+            ],
+            "VIII.1": [
+                "ALIYA RATU SALSABILA", "ANDIKA", "ANITA MAWAR", "AZWAN FAIZ", "DIVAL ALFIANDRA",
+                "ISRA FIRAHMAT", "ISTIQOMAH", "M.RISKI ADITYA", "MUAKIFATUN NAILAH USMAN",
+                "MUH. UZNUL KHUDUD", "MUH. YAZID ALGHYFARI", "MUH.ALVIANSYAH", "MUHAMMAD ALIF",
+                "MUHAMMAD ANAMTA MUCTIALI", "MUTMAINNA", "NUR WAHYUNI", "NURUL APRILIA",
+                "NUZULIA RAHMA", "REZKY AMELIA", "RIVAL MUHAJIRIN", "SALSABILA AZ-ZAHRA",
+                "ULFATUN NISA", "ZHUFAHIRA ADZHA PUTRI"
+            ],
+            "VIII.2": [
+                "AFIF AL GIFARI", "ALIF AKRAM", "AYIRA", "DIRHAN FAIS", "FIRKAN PUTRA",
+                "FIRMANSYAH", "FITRI AGUSTINA", "HASRUL", "KHAERUL AZZAM", "MAJSYANDHA",
+                "MUH. RIFALDI", "MUHAMMAD ARIL", "MUHAMMAD MANSUR", "NAILA", "NAZILAH AZAHRA",
+                "NUR AIVAH", "NUR FAUZIA ANNISA", "NUR FAZIRA", "NUR WAFIQAH", "NURLINDA",
+                "RIFYAH AMALIAH HAM", "ZAINAB ASVIA"
+            ],
+            "VIII.3": [
+                "MARSYAH KOYRALA", "AFGIAN TRI WIJAYA", "AFIFAH UFAIRAH", "ARFI AZAN", "DANDI",
+                "FAUZIL RAHMAT", "HILDA NURSIDQIAZIZAH", "ISMAIL", "KARIIMAH SHOBRYYAH",
+                "KHAIRUL FAJAR", "KIRANA SYAM", "MUH. AGIH", "MUH. RENALDI", "MUSTAFAINAL YAHYA",
+                "NINDYA GURATTU AENI", "NURAENI", "NURUL BIDASARI AULIYA", "SALMIA",
+                "SUFRIADY", "TIARA RAMADHANI"
+            ],
+            "IX.1": [
+                "ARIL ARDIANSYAH", "ASHAR ASDAR", "A.RISMA ASTARI", "AHSANUL QASAS", "AMELIA PUTRI",
+                "ANDI NURAFIFA R.BASO", "ARIF RAHMAN", "ASMIRANDA", "ATIKAH FAJARWATY", "CHELSEA AMINITY PUTRI",
+                "HAIKAL", "IIN INAYAH PUTRI", "JAYA SAPUTRA", "KASMIA DAHNIA", "KHAERUL AZZAM", "MARSIJI",
+                "MOHAMMAD WAHYU", "MUH.ILLIAS", "MUHAMMAD ZIDAN ARKANA", "NURAENI", "NURLAILY", "NURSAHDA",
+                "NURSYAKILA", "SUCI RAMADHANI", "SUL JALALIN WALIQRAM", "SYAMSURYADI", "SYARLINI"
+            ],
+            "IX.2": [
+                "A. KHALIFATUL ADAWIYA", "AGHYVANNO ALIFQA AZZAM", "ANDI AMSYA", "ARIANTI",
+                "ASKIA NUR FADILLAH", "FEBRIANI MAULIDYA", "IKBAL RADIMAN", "IRWANSYAH",
+                "ISFA SALSABILA", "MIKA NUR AKBAR", "MUH ASRAM DANI", "MUH JAELANI",
+                "MUH.RIJALUL HAQ", "MUHAMMAD AHAR ADHYRA", "MUHAMMAD FAHRI", "MUHAMMAD FAWWAZ",
+                "MUHDIYATUL ADZQIYAH", "NENSI", "NURFATIMA", "NURUL AINI", "PUTRI DIANA",
+                "RIFKATUL JANNA", "SAPUTRA EFENDI", "SELVY SAID", "SITI AQILA ANNISA", "SULFAIDAH"
+            ]
+        };
 
-      // Cek apakah ada siswa yang belum diabsen
-      const blmAbsen = currentStudents.filter(nama => !absensiState[nama]);
-      if (blmAbsen.length > 0) {
-        return Swal.fire({ icon: 'warning', text: '⚠ Masih ada siswa yang belum diabsen.' });
-      }
+        let currentClass = "VII.1";
+        let currentGrades = {};
+        // Safe In-Memory Storage for Apps Script iframe sandbox compatibility
+        let inMemoryStorage = {};
 
-      // Siapkan paket data untuk backend
-      const record = [];
-      currentStudents.forEach(nama => {
-        record.push({ nama: nama, status: absensiState[nama] });
-      });
-
-      const payload = {
-        kelas: kelas,
-        tanggal: tanggal,
-        pertemuan: pertemuan,
-        students: record
-      };
-
-      // Loading State
-      const btn = document.getElementById("btnSimpan");
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> MENYIMPAN...';
-      btn.disabled = true;
-
-      // Kirim data ke Code.gs
-      google.script.run.withSuccessHandler(function(response) {
-        btn.innerHTML = '<i class="fas fa-save mr-2"></i> SIMPAN ABSENSI';
-        btn.disabled = false;
-        
-        if(response.success) {
-          Swal.fire({ icon: 'success', title: 'Berhasil!', text: '✓ Absensi berhasil disimpan!' });
-        } else {
-          Swal.fire({ icon: 'error', title: 'Gagal Menyimpan', text: response.message });
-        }
-      }).saveAttendance(payload);
-    }
-
-    // 10. Fitur Rekap dan Export
-    function bukaRekap() {
-      Swal.fire({
-        title: 'Fitur Rekap',
-        text: 'Data telah tersimpan rapi. Untuk melihat rekap lengkap per pertemuan, silakan gunakan tombol DOWNLOAD EXCEL.',
-        icon: 'info',
-        confirmButtonColor: '#3B82F6'
-      });
-    }
-
-    function downloadExcel() {
-      Swal.fire({
-        title: 'Menyiapkan File...',
-        text: 'Sedang membuat link file Excel Anda.',
-        allowOutsideClick: false,
-        didOpen: () => { Swal.showLoading(); }
-      });
-
-      google.script.run.withSuccessHandler(function(url) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Siap Diunduh!',
-          text: '✓ Rekap Excel berhasil dibuat dan siap diunduh!',
-          confirmButtonText: 'Download Excel',
-          confirmButtonColor: '#06B6D4'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.open(url, '_blank');
-          }
+        // INITALIZATION ON LOAD
+        window.addEventListener('DOMContentLoaded', () => {
+            switchClass('VII.1');
         });
-      }).getSpreadsheetUrl();
-    }
-  </script>
+
+        function switchClass(className) {
+            currentClass = className;
+            document.getElementById('search-input').value = '';
+            loadSavedGrades();
+            renderTable();
+        }
+
+        // SAFE LOCAL STORAGE WITH IN-MEMORY FALLBACK
+        function safeGetStorage(key) {
+            try {
+                if (typeof window !== 'undefined' && window.localStorage) {
+                    return window.localStorage.getItem(key);
+                }
+            } catch (e) {
+                console.warn("LocalStorage unavailable, using memory store:", e);
+            }
+            return inMemoryStorage[key] || null;
+        }
+
+        function safeSetStorage(key, value) {
+            try {
+                if (typeof window !== 'undefined' && window.localStorage) {
+                    window.localStorage.setItem(key, value);
+                }
+            } catch (e) {
+                console.warn("LocalStorage write failed, using memory store:", e);
+            }
+            inMemoryStorage[key] = value;
+        }
+
+        function loadSavedGrades() {
+            const key = `INFORMATIKA_FUN_NILAI_${currentClass}`;
+            const stored = safeGetStorage(key);
+            if (stored) {
+                try {
+                    currentGrades = JSON.parse(stored);
+                } catch(e) {
+                    currentGrades = {};
+                }
+            } else {
+                currentGrades = {};
+            }
+        }
+
+        function renderTable() {
+            const isGrade7or9 = currentClass.startsWith('VII') || currentClass.startsWith('IX');
+            const students = classData[currentClass];
+
+            // Update Total Student Count Indicator
+            document.getElementById('stat-student-count').innerText = students.length;
+
+            const thead = document.getElementById('table-head');
+            const tbody = document.getElementById('table-body');
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+
+            if (isGrade7or9) {
+                // MULTI-LEVEL HEADER FOR CLASSES VII & IX (4 BABs)
+                thead.innerHTML = `
+                    <tr class="text-slate-800 bg-slate-100 uppercase text-[10px] font-bold tracking-wider">
+                        <th rowspan="3" class="p-2.5 sticky-col-1 sticky-header-1 border-b border-r border-slate-300 w-[48px] text-center bg-slate-200 text-slate-800">No</th>
+                        <th rowspan="3" class="p-2.5 sticky-col-2 sticky-header-1 border-b border-r border-slate-300 min-w-[190px] bg-slate-200 text-slate-800">Nama Siswa</th>
+                        <th colspan="5" class="p-2 border-b border-r border-slate-300 text-center bg-denim text-white">BAB 1</th>
+                        <th colspan="5" class="p-2 border-b border-r border-slate-300 text-center bg-denim text-white">BAB 2</th>
+                        <th colspan="5" class="p-2 border-b border-r border-slate-300 text-center bg-denim text-white">BAB 3</th>
+                        <th colspan="5" class="p-2 border-b border-r border-slate-300 text-center bg-denim text-white">BAB 4</th>
+                        <th rowspan="3" class="p-2.5 border-b border-slate-300 text-center bg-warm-cream text-amber-900 min-w-[85px] font-extrabold">RATA-RATA</th>
+                    </tr>
+                    <tr class="text-slate-800 uppercase text-[9px] font-bold">
+                        <th colspan="4" class="p-1 border-b border-r border-slate-300 text-center bg-light-blue text-blue-900">FORMATIF</th>
+                        <th colspan="1" class="p-1 border-b border-r border-slate-300 text-center bg-cyan-100 text-cyan-900">SUMATIF</th>
+                        <th colspan="4" class="p-1 border-b border-r border-slate-300 text-center bg-light-blue text-blue-900">FORMATIF</th>
+                        <th colspan="1" class="p-1 border-b border-r border-slate-300 text-center bg-cyan-100 text-cyan-900">SUMATIF</th>
+                        <th colspan="4" class="p-1 border-b border-r border-slate-300 text-center bg-light-blue text-blue-900">FORMATIF</th>
+                        <th colspan="1" class="p-1 border-b border-r border-slate-300 text-center bg-cyan-100 text-cyan-900">SUMATIF</th>
+                        <th colspan="4" class="p-1 border-b border-r border-slate-300 text-center bg-light-blue text-blue-900">FORMATIF</th>
+                        <th colspan="1" class="p-1 border-b border-r border-slate-300 text-center bg-cyan-100 text-cyan-900">SUMATIF</th>
+                    </tr>
+                    <tr class="text-slate-600 font-semibold text-[9px] text-center bg-slate-50">
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F1</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F2</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F3</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F4</th>
+                        <th class="p-1 border-b border-r border-slate-300 bg-cyan-50 font-bold text-cyan-900">S1</th>
+
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F1</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F2</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F3</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F4</th>
+                        <th class="p-1 border-b border-r border-slate-300 bg-cyan-50 font-bold text-cyan-900">S2</th>
+
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F1</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F2</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F3</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F4</th>
+                        <th class="p-1 border-b border-r border-slate-300 bg-cyan-50 font-bold text-cyan-900">S3</th>
+
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F1</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F2</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F3</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F4</th>
+                        <th class="p-1 border-b border-r border-slate-300 bg-cyan-50 font-bold text-cyan-900">S4</th>
+                    </tr>
+                `;
+
+                // STUDENT ROWS FOR CLASSES VII & IX
+                students.forEach((name, idx) => {
+                    const studentGrades = currentGrades[idx] || {};
+                    let rowHtml = `
+                        <tr class="hover:bg-blue-50/50 transition-colors student-row" data-name="${name.toLowerCase()}">
+                            <td class="p-2 text-center font-bold text-slate-500 sticky-col-1 border-b border-r border-slate-200">${idx + 1}</td>
+                            <td class="p-2 font-medium text-slate-800 sticky-col-2 border-b border-r border-slate-300 whitespace-nowrap">${name}</td>
+                    `;
+
+                    for (let bab = 1; bab <= 4; bab++) {
+                        for (let f = 1; f <= 4; f++) {
+                            const fieldKey = `b${bab}_f${f}`;
+                            const val = studentGrades[fieldKey] !== undefined ? studentGrades[fieldKey] : '';
+                            rowHtml += `
+                                <td class="p-1 border-b border-r border-slate-200 text-center">
+                                    <input type="text" maxlength="3" class="grade-input" data-student="${idx}" data-field="${fieldKey}" value="${val}" oninput="handleInput(this)" onkeydown="navigateKey(event, this)">
+                                </td>
+                            `;
+                        }
+                        const sKey = `b${bab}_s1`;
+                        const sVal = studentGrades[sKey] !== undefined ? studentGrades[sKey] : '';
+                        rowHtml += `
+                            <td class="p-1 border-b border-r border-slate-300 text-center bg-cyan-50/40">
+                                <input type="text" maxlength="3" class="grade-input font-bold text-cyan-900" data-student="${idx}" data-field="${sKey}" value="${sVal}" oninput="handleInput(this)" onkeydown="navigateKey(event, this)">
+                            </td>
+                        `;
+                    }
+
+                    rowHtml += `
+                        <td id="avg-${idx}" class="p-2 text-center font-bold text-amber-900 bg-warm-cream/50 border-b border-slate-300">0.0</td>
+                    </tr>
+                    `;
+                    tbody.innerHTML += rowHtml;
+                });
+
+            } else {
+                // MULTI-LEVEL HEADER FOR CLASS VIII (1 BAB: 9 FORMATIF + 2 SUMATIF)
+                thead.innerHTML = `
+                    <tr class="text-slate-800 bg-slate-100 uppercase text-[10px] font-bold tracking-wider">
+                        <th rowspan="3" class="p-2.5 sticky-col-1 sticky-header-1 border-b border-r border-slate-300 w-[48px] text-center bg-slate-200 text-slate-800">No</th>
+                        <th rowspan="3" class="p-2.5 sticky-col-2 sticky-header-1 border-b border-r border-slate-300 min-w-[190px] bg-slate-200 text-slate-800">Nama Siswa</th>
+                        <th colspan="11" class="p-2 border-b border-r border-slate-300 text-center bg-denim text-white">BAB 1</th>
+                        <th rowspan="3" class="p-2.5 border-b border-slate-300 text-center bg-warm-cream text-amber-900 min-w-[85px] font-extrabold">RATA-RATA</th>
+                    </tr>
+                    <tr class="text-slate-800 uppercase text-[9px] font-bold">
+                        <th colspan="9" class="p-1 border-b border-r border-slate-300 text-center bg-light-blue text-blue-900">FORMATIF</th>
+                        <th colspan="2" class="p-1 border-b border-r border-slate-300 text-center bg-cyan-100 text-cyan-900">SUMATIF</th>
+                    </tr>
+                    <tr class="text-slate-600 font-semibold text-[9px] text-center bg-slate-50">
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F1</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F2</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F3</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F4</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F5</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F6</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F7</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F8</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-baby-blue/50">F9</th>
+                        <th class="p-1 border-b border-r border-slate-200 bg-cyan-50 font-bold text-cyan-900">S1</th>
+                        <th class="p-1 border-b border-r border-slate-300 bg-cyan-50 font-bold text-cyan-900">S2</th>
+                    </tr>
+                `;
+
+                // STUDENT ROWS FOR CLASS VIII
+                students.forEach((name, idx) => {
+                    const studentGrades = currentGrades[idx] || {};
+                    let rowHtml = `
+                        <tr class="hover:bg-blue-50/50 transition-colors student-row" data-name="${name.toLowerCase()}">
+                            <td class="p-2 text-center font-bold text-slate-500 sticky-col-1 border-b border-r border-slate-200">${idx + 1}</td>
+                            <td class="p-2 font-medium text-slate-800 sticky-col-2 border-b border-r border-slate-300 whitespace-nowrap">${name}</td>
+                    `;
+
+                    for (let f = 1; f <= 9; f++) {
+                        const fieldKey = `b1_f${f}`;
+                        const val = studentGrades[fieldKey] !== undefined ? studentGrades[fieldKey] : '';
+                        rowHtml += `
+                            <td class="p-1 border-b border-r border-slate-200 text-center">
+                                <input type="text" maxlength="3" class="grade-input" data-student="${idx}" data-field="${fieldKey}" value="${val}" oninput="handleInput(this)" onkeydown="navigateKey(event, this)">
+                            </td>
+                        `;
+                    }
+                    for (let s = 1; s <= 2; s++) {
+                        const sKey = `b1_s${s}`;
+                        const sVal = studentGrades[sKey] !== undefined ? studentGrades[sKey] : '';
+                        rowHtml += `
+                            <td class="p-1 border-b border-r border-slate-300 text-center bg-cyan-50/40">
+                                <input type="text" maxlength="3" class="grade-input font-bold text-cyan-900" data-student="${idx}" data-field="${sKey}" value="${sVal}" oninput="handleInput(this)" onkeydown="navigateKey(event, this)">
+                            </td>
+                        `;
+                    }
+
+                    rowHtml += `
+                        <td id="avg-${idx}" class="p-2 text-center font-bold text-amber-900 bg-warm-cream/50 border-b border-slate-300">0.0</td>
+                    </tr>
+                    `;
+                    tbody.innerHTML += rowHtml;
+                });
+            }
+
+            updateAllAverages();
+        }
+
+        function handleInput(input) {
+            let val = input.value;
+
+            // Strip non-digit characters
+            if (val !== '' && !/^\d+$/.test(val)) {
+                input.value = val.replace(/\D/g, '');
+                val = input.value;
+            }
+
+            // Enforce Range 0–100 Validation
+            if (val !== '') {
+                let numVal = parseInt(val, 10);
+                if (numVal > 100) {
+                    input.classList.add('input-error');
+                    showToast("Nilai harus berada pada rentang 0–100.");
+                    input.value = '100';
+                } else {
+                    input.classList.remove('input-error');
+                }
+            } else {
+                input.classList.remove('input-error');
+            }
+
+            const studentIdx = input.getAttribute('data-student');
+            const fieldKey = input.getAttribute('data-field');
+
+            if (!currentGrades[studentIdx]) currentGrades[studentIdx] = {};
+            currentGrades[studentIdx][fieldKey] = input.value;
+
+            updateStudentAverage(studentIdx);
+            updateClassAverage();
+        }
+
+        // KEYBOARD NAVIGATION (ARROW UP & ARROW DOWN)
+        function navigateKey(e, input) {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                const studentIdx = parseInt(input.getAttribute('data-student'), 10);
+                const fieldKey = input.getAttribute('data-field');
+                const targetIdx = e.key === 'ArrowDown' ? studentIdx + 1 : studentIdx - 1;
+
+                const nextInput = document.querySelector(`input[data-student="${targetIdx}"][data-field="${fieldKey}"]`);
+                if (nextInput) {
+                    nextInput.focus();
+                    nextInput.select();
+                }
+            }
+        }
+
+        // FORMULA: ((2 * Average_Formatif + Average_Sumatif) / 3)
+        function updateStudentAverage(studentIdx) {
+            const isGrade7or9 = currentClass.startsWith('VII') || currentClass.startsWith('IX');
+            const sGrades = currentGrades[studentIdx] || {};
+
+            let formatifVals = [];
+            let sumatifVals = [];
+
+            if (isGrade7or9) {
+                for (let b = 1; b <= 4; b++) {
+                    for (let f = 1; f <= 4; f++) {
+                        let v = sGrades[`b${b}_f${f}`];
+                        if (v !== undefined && v !== '') formatifVals.push(parseFloat(v));
+                    }
+                    let s = sGrades[`b${b}_s1`];
+                    if (s !== undefined && s !== '') sumatifVals.push(parseFloat(s));
+                }
+            } else {
+                for (let f = 1; f <= 9; f++) {
+                    let v = sGrades[`b1_f${f}`];
+                    if (v !== undefined && v !== '') formatifVals.push(parseFloat(v));
+                }
+                for (let s = 1; s <= 2; s++) {
+                    let v = sGrades[`b1_s${s}`];
+                    if (v !== undefined && v !== '') sumatifVals.push(parseFloat(v));
+                }
+            }
+
+            const avgFormatif = formatifVals.length > 0 ? (formatifVals.reduce((a,b)=>a+b, 0) / formatifVals.length) : 0;
+            const avgSumatif = sumatifVals.length > 0 ? (sumatifVals.reduce((a,b)=>a+b, 0) / sumatifVals.length) : 0;
+
+            let finalAvg = 0;
+            if (formatifVals.length > 0 || sumatifVals.length > 0) {
+                finalAvg = ((2 * avgFormatif) + avgSumatif) / 3;
+            }
+
+            const avgCell = document.getElementById(`avg-${studentIdx}`);
+            if (avgCell) {
+                avgCell.innerText = finalAvg > 0 ? finalAvg.toFixed(1) : '0.0';
+            }
+        }
+
+        function updateAllAverages() {
+            const students = classData[currentClass];
+            students.forEach((_, idx) => updateStudentAverage(idx));
+            updateClassAverage();
+        }
+
+        function updateClassAverage() {
+            const students = classData[currentClass];
+            let total = 0;
+            let count = 0;
+
+            students.forEach((_, idx) => {
+                const avgCell = document.getElementById(`avg-${idx}`);
+                if (avgCell) {
+                    const val = parseFloat(avgCell.innerText);
+                    if (val > 0) {
+                        total += val;
+                        count++;
+                    }
+                }
+            });
+
+            const classAvg = count > 0 ? (total / count).toFixed(1) : '0.0';
+            document.getElementById('stat-class-avg').innerText = classAvg;
+        }
+
+        // REALTIME SEARCH FILTER
+        function filterStudents(query) {
+            const q = query.toLowerCase().trim();
+            const rows = document.querySelectorAll('.student-row');
+            rows.forEach(row => {
+                const name = row.getAttribute('data-name');
+                row.style.display = name.includes(q) ? '' : 'none';
+            });
+        }
+
+        function confirmSave() {
+            const isGrade7or9 = currentClass.startsWith('VII') || currentClass.startsWith('IX');
+            const students = classData[currentClass];
+            let hasEmpty = false;
+
+            const totalFieldsPerStudent = isGrade7or9 ? 20 : 11;
+
+            for (let i = 0; i < students.length; i++) {
+                const sGrades = currentGrades[i] || {};
+                const filledCount = Object.keys(sGrades).filter(k => sGrades[k] !== '').length;
+                if (filledCount < totalFieldsPerStudent) {
+                    hasEmpty = true;
+                    break;
+                }
+            }
+
+            if (hasEmpty) {
+                document.getElementById('modal-confirm').classList.remove('hidden');
+            } else {
+                executeSave();
+            }
+        }
+
+        function executeSave() {
+            closeModal('modal-confirm');
+            const key = `INFORMATIKA_FUN_NILAI_${currentClass}`;
+            safeSetStorage(key, JSON.stringify(currentGrades));
+            document.getElementById('modal-success').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.remove('translate-x-full');
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+            }, 3000);
+        }
+
+        function exportToExcel() {
+            const isGrade7or9 = currentClass.startsWith('VII') || currentClass.startsWith('IX');
+            const students = classData[currentClass];
+            let aoa = [];
+            let merges = [];
+
+            if (isGrade7or9) {
+                let r1 = ["No", "Nama Siswa", "BAB 1", "", "", "", "", "BAB 2", "", "", "", "", "BAB 3", "", "", "", "", "BAB 4", "", "", "", "", "RATA-RATA"];
+                let r2 = ["", "", "FORMATIF", "", "", "", "SUMATIF", "FORMATIF", "", "", "", "SUMATIF", "FORMATIF", "", "", "", "SUMATIF", "FORMATIF", "", "", "", "SUMATIF", ""];
+                let r3 = ["", "", "F1", "F2", "F3", "F4", "S1", "F1", "F2", "F3", "F4", "S2", "F1", "F2", "F3", "F4", "S3", "F1", "F2", "F3", "F4", "S4", ""];
+
+                aoa.push(r1, r2, r3);
+
+                merges.push({s:{r:0, c:0}, e:{r:2, c:0}});
+                merges.push({s:{r:0, c:1}, e:{r:2, c:1}});
+                merges.push({s:{r:0, c:22}, e:{r:2, c:22}});
+
+                merges.push({s:{r:0, c:2}, e:{r:0, c:6}});
+                merges.push({s:{r:0, c:7}, e:{r:0, c:11}});
+                merges.push({s:{r:0, c:12}, e:{r:0, c:16}});
+                merges.push({s:{r:0, c:17}, e:{r:0, c:21}});
+
+                for (let i = 0; i < 4; i++) {
+                    let colStart = 2 + (i * 5);
+                    merges.push({s:{r:1, c:colStart}, e:{r:1, c:colStart + 3}});
+                }
+
+                students.forEach((name, idx) => {
+                    const sGrades = currentGrades[idx] || {};
+                    let row = [idx + 1, name];
+
+                    for (let b = 1; b <= 4; b++) {
+                        for (let f = 1; f <= 4; f++) {
+                            let v = sGrades[`b${b}_f${f}`];
+                            row.push(v !== undefined && v !== '' ? parseFloat(v) : '');
+                        }
+                        let s = sGrades[`b${b}_s1`];
+                        row.push(s !== undefined && s !== '' ? parseFloat(s) : '');
+                    }
+
+                    const avgCell = document.getElementById(`avg-${idx}`);
+                    row.push(avgCell ? parseFloat(avgCell.innerText) : 0);
+                    aoa.push(row);
+                });
+
+            } else {
+                let r1 = ["No", "Nama Siswa", "BAB 1", "", "", "", "", "", "", "", "", "", "", "RATA-RATA"];
+                let r2 = ["", "", "FORMATIF", "", "", "", "", "", "", "", "", "SUMATIF", "", ""];
+                let r3 = ["", "", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "S1", "S2", ""];
+
+                aoa.push(r1, r2, r3);
+
+                merges.push({s:{r:0, c:0}, e:{r:2, c:0}});
+                merges.push({s:{r:0, c:1}, e:{r:2, c:1}});
+                merges.push({s:{r:0, c:13}, e:{r:2, c:13}});
+
+                merges.push({s:{r:0, c:2}, e:{r:0, c:12}});
+                merges.push({s:{r:1, c:2}, e:{r:1, c:10}});
+                merges.push({s:{r:1, c:11}, e:{r:1, c:12}});
+
+                students.forEach((name, idx) => {
+                    const sGrades = currentGrades[idx] || {};
+                    let row = [idx + 1, name];
+
+                    for (let f = 1; f <= 9; f++) {
+                        let v = sGrades[`b1_f${f}`];
+                        row.push(v !== undefined && v !== '' ? parseFloat(v) : '');
+                    }
+                    for (let s = 1; s <= 2; s++) {
+                        let v = sGrades[`b1_s${s}`];
+                        row.push(v !== undefined && v !== '' ? parseFloat(v) : '');
+                    }
+
+                    const avgCell = document.getElementById(`avg-${idx}`);
+                    row.push(avgCell ? parseFloat(avgCell.innerText) : 0);
+                    aoa.push(row);
+                });
+            }
+
+            let ws = XLSX.utils.aoa_to_sheet(aoa);
+            ws['!merges'] = merges;
+
+            let colWidths = [{ wch: 6 }, { wch: 30 }];
+            const totalScoreCols = isGrade7or9 ? 21 : 12;
+            for (let i = 0; i < totalScoreCols; i++) {
+                colWidths.push({ wch: 8 });
+            }
+            ws['!cols'] = colWidths;
+
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, `Nilai ${currentClass}`);
+            XLSX.writeFile(wb, `Daftar_Nilai_Informatika_${currentClass}.xlsx`);
+        }
+    </script>
 </body>
 </html>
